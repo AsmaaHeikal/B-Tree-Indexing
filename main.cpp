@@ -1,27 +1,9 @@
-#include<bits/stdc++.h>
+#include <fstream>
+#include <iostream>
+#include <vector>
 
 using namespace std;
-int n,m;
-
-// struct node{
-// public:
-//     int status;
-//     int size;
-//     int *arr;
-
-//     node(){
-//         this->status = -1;
-//     }
-//     node(int m, int next) {
-//         this->size = m * 2;
-//         this->status = -1;
-//         arr = new int[size];
-//         arr[0] = next;
-//         for (int i = 1; i < (size); ++i) {
-//             arr[i] = -1;
-//         }
-//     }
-// };
+int n, m;
 
 struct Node
 {
@@ -31,76 +13,97 @@ struct Node
     Node(int m) : type(-1), keyValuePairs(m, make_pair(-1, -1)) {}
 };
 
+// main functions
 void CreateIndexFileFile (char* filename, int numberOfRecords, int m);
 int InsertNewRecordAtIndex (char* filename, int RecordID, int Reference);
 void DeleteRecordFromIndex (char* filename, int RecordID);
 void DisplayIndexFileContent (char* filename);
 int SearchARecord (char* filename, int RecordID);
 
+
+// utils
+vector<Node> loadBTreeInMemory( char *filename, int numNodes, int m);
+
+void writeBTreeToFile( char *filename, const vector<Node> nodes, int m);
+
+int findHighestKey(const vector<pair<int, int> > &keyValuePairs);
+
+void splitRootNode(vector<Node> &nodes, int m, int newKey);
+
+void SimpleInsert(Node &node, int RecordID, int Reference);
+
+int splitChild(vector<Node> &nodes, int parentIndex, int childIndex, int newKey);
+
+void updateRootNodeContent(vector<Node> &nodes);
+
+void updateNextEmptyNodeIndex(vector<Node> &nodes);
+
+
 int main() {
+    char filename[] = "btree_index.bin";
     n=10, m=5;
-    CreateIndexFile ("BTreeIndexFile.bin", n, m);
+    CreateIndexFileFile (filename, n, m);
+    InsertNewRecordAtIndex(filename, 3, 12);
+    InsertNewRecordAtIndex(filename, 7, 24);
+    InsertNewRecordAtIndex(filename, 10, 48);
+    InsertNewRecordAtIndex(filename, 24, 60);
+    InsertNewRecordAtIndex(filename, 14, 72);
+    InsertNewRecordAtIndex(filename, 19, 48);
+    InsertNewRecordAtIndex(filename, 30, 96);
+    InsertNewRecordAtIndex(filename, 15, 108);
+    InsertNewRecordAtIndex(filename, 1, 120);
+    InsertNewRecordAtIndex(filename, 5, 132);
 
-    cout << "Welcome to the B-tree indexing file!:\n";
-    while(true){
-        cout << "\n1.Insert a new record\n"
-                "2.Delete a record\n"
-                "3.Display file content\n"
-                "4.Search a record\n"
-                "5.Exit\n";
+    InsertNewRecordAtIndex(filename, 2, 144);
 
-        int choice;
-        cout << "Enter your choice: ";
-        cin >> choice;
-        switch (choice) {
-            case 1:
-//            InsertNewRecordAtIndex();
-                break;
-            case 2:
-//            DeleteRecordFromIndex();
-                break;
-            case 3:
-                DisplayIndexFileContent("BTreeIndexFile.bin");
-                break;
-            case 4:
-//            SearchARecord();
-                break;
-            case 5:
-                return 0;
-            default:
-                cout << "Invalid choice.Please try again!\n";
-                break;
-        }
-    }
+    InsertNewRecordAtIndex(filename, 8, 156);
+    InsertNewRecordAtIndex(filename, 9, 168);
+    InsertNewRecordAtIndex(filename, 6, 180);
+    InsertNewRecordAtIndex(filename, 11, 192);
+    InsertNewRecordAtIndex(filename, 12, 204);
+    InsertNewRecordAtIndex(filename, 18, 228);
+    InsertNewRecordAtIndex(filename, 17, 216);
+    DisplayIndexFileContent(filename);
+//    cout << "Welcome to the B-tree indexing file!:\n";
+//    while(true){
+//        cout << "\n1.Insert a new record\n"
+//                "2.Delete a record\n"
+//                "3.Display file content\n"
+//                "4.Search a record\n"
+//                "5.Exit\n";
+//
+//        int choice;
+//        cout << "Enter your choice: ";
+//        cin >> choice;
+//        switch (choice) {
+//            case 1:
+////            InsertNewRecordAtIndex();
+//                break;
+//            case 2:
+////            DeleteRecordFromIndex();
+//                break;
+//            case 3:
+//                DisplayIndexFileContent("BTreeIndexFile.bin");
+//                break;
+//            case 4:
+////            SearchARecord();
+//                break;
+//            case 5:
+//                return 0;
+//            default:
+//                cout << "Invalid choice.Please try again!\n";
+//                break;
+//        }
+//    }
 }
 
-// void CreateIndexFile (char* filename, int numberOfRecords, int m){
-//     ofstream Btree;
-//     Btree.open(filename, ios::in | ios::out | ios::binary | ios::app);
 
-//     // from 0 to numberOfRecords - 2 as the last one is a special case (-1)
-//     for (int i = 0; i < numberOfRecords - 1; i++) {
-//         node Node(m, i + 1);
-//         // write the node to the file
-//         Btree.write((char *) &Node, sizeof(Node));
-//     }
-//     // the last node is a special case(-1)
-//     node Node(m, -1);
-//     Btree.write((char *) &Node, sizeof(Node));
-
-//     Btree.close();
-// }
-
-
-int InsertNewRecordAtIndex (char* filename, int RecordID, int Reference){
-
-}
 
 void DeleteRecordFromIndex (char* filename, int RecordID){
 
 }
 
-void CreateIndexFileFile(char *filename, int numNodes, int m)
+void CreateIndexFileFile(char *filename, int numberOfRecords, int m)
 {
     ofstream outFile(filename, ios::binary);
 
@@ -123,7 +126,7 @@ void CreateIndexFileFile(char *filename, int numNodes, int m)
     }
 
     Node defaultNode(m);
-    for (int i = 1; i < numNodes; ++i)
+    for (int i = 1; i < numberOfRecords; ++i)
     {
         // all uninitialized yet type = -1
         outFile.write((char*)(&defaultNode.type), sizeof(defaultNode.type));
@@ -139,7 +142,7 @@ void CreateIndexFileFile(char *filename, int numNodes, int m)
     outFile.close();
 }
 
-void DisplayIndexFileContent(char *filename)
+void DisplayIndexFileContent( char *filename)
 {
     ifstream inFile(filename, ios::binary);
     if (!inFile.is_open())
@@ -158,14 +161,14 @@ void DisplayIndexFileContent(char *filename)
 
     int index = 0;
     Node node(m);
-    while (inFile.read(reinterpret_cast<char *>(&node.type), sizeof(node.type)))
+    while (inFile.read((char*)(&node.type), sizeof(node.type)))
     {
         cout << index++ << " | " << (node.type == -1 ? "X" : (node.type == 0 ? "Y" : "N")) << " | ";
         for (int i = 0; i < m; ++i)
         {
             int key, value;
-            inFile.read(reinterpret_cast<char *>(&key), sizeof(key));
-            inFile.read(reinterpret_cast<char *>(&value), sizeof(value));
+            inFile.read((char*)(&key), sizeof(key));
+            inFile.read((char*)(&value), sizeof(value));
             cout << key << " | " << value << " | ";
         }
         cout << endl;
@@ -177,24 +180,278 @@ void DisplayIndexFileContent(char *filename)
     inFile.close();
 }
 
-// void DisplayIndexFileContent (char* filename){
-//     fstream Btree;
-//     Btree.open(filename, ios::in | ios::out | ios::binary | ios::app);
+int SearchARecord (char* filename, int RecordID){}
 
-//     Btree.seekg(0, ios::beg);
-//     node Node;
-//     // read the node from the file
-//     while (Btree.read((char *) &Node, sizeof(Node))) {
-//         cout << Node.status << " ";
-//         for (int i = 0; i < Node.size; ++i) {
-//             cout << Node.arr[i] << " ";
-//         }
-//         cout << endl;
-//     }
+// ################### insertion ###################
+int InsertNewRecordAtIndex(char *filename, int RecordID, int Reference)
+{
 
-//     Btree.close();
-// }
+    vector<Node> nodes = loadBTreeInMemory(filename, n, m);
 
-int SearchARecord (char* filename, int RecordID){
+    // root is at index 1
+    Node &node = nodes[1];
 
+    if (node.type == -1)
+    {
+        node.type = 0;
+        SimpleInsert(node, RecordID, Reference);
+    }
+    else
+    {
+        if (node.isFull && node.type == 0)
+        {
+            splitRootNode(nodes, m, RecordID);
+
+            // insert the new record into the right node
+            int rootNodeIndex = nodes[1].type == 0 ? 1 : (RecordID < nodes[1].keyValuePairs[0].first ? 2 : 3);
+            SimpleInsert(nodes[rootNodeIndex], RecordID, Reference);
+        }
+        else if (node.type == 1)
+        {
+            // Find the right child based on the key
+            int childIndex = -1;
+            int i;
+            for (i = 0; i < m; ++i)
+            {
+                if (node.keyValuePairs[i].first > RecordID)
+                {
+                    childIndex = node.keyValuePairs[i].second;
+                    break;
+                }
+
+                // in case new key is bigger than all of the existing ones in root
+                // then take the last one once you see a key = -1
+                if (node.keyValuePairs[i].first == -1)
+                {
+                    childIndex = node.keyValuePairs[i - 1].second;
+                    i--;
+                    break;
+                }
+            }
+
+            if (childIndex == -1)
+            {
+                //  if all keys are less than RecordID
+                childIndex = node.keyValuePairs[m - 1].second;
+                i = m - 1;
+            }
+
+            if (nodes[childIndex].isFull)
+            {
+                int newChildIndex = splitChild(nodes, 1, childIndex, RecordID);
+
+                SimpleInsert(nodes[newChildIndex], RecordID, Reference);
+
+
+                updateRootNodeContent(nodes);
+                updateNextEmptyNodeIndex(nodes);
+            }
+
+            SimpleInsert(nodes[childIndex], RecordID, Reference);
+
+            // in case the new key than the existing key in root
+            // update the key with the one of highest value
+            node.keyValuePairs[i].first = findHighestKey(nodes[childIndex].keyValuePairs);
+        }
+        else
+        {
+            SimpleInsert(node, RecordID, Reference);
+        }
+    }
+
+    updateNextEmptyNodeIndex(nodes);
+    writeBTreeToFile(filename, nodes, m);
+
+    return 0;
+}
+
+// utils
+vector<Node> loadBTreeInMemory(char *filename, int numNodes, int m)
+{
+    ifstream inFile(filename, ios::binary);
+    vector<Node> nodes;
+
+    if (!inFile.is_open())
+    {
+        cerr << "Error opening file for reading." << endl;
+        return nodes;
+    }
+
+    for (int i = 0; i < numNodes; ++i)
+    {
+        Node node(m);
+        inFile.read((char*)(&node.type), sizeof(node.type));
+        for (auto &kv : node.keyValuePairs)
+        {
+            inFile.read((char*)(&kv.first), sizeof(kv.first));
+            inFile.read((char*)(&kv.second), sizeof(kv.second));
+        }
+        node.isFull = (node.keyValuePairs.back().first != -1 && node.keyValuePairs.back().second != -1);
+
+        nodes.push_back(node);
+    }
+
+    inFile.close();
+    return nodes;
+}
+
+void writeBTreeToFile(char *filename,  vector<Node> nodes, int m)
+{
+    ofstream outFile(filename, ios::binary);
+
+    if (!outFile.is_open())
+    {
+        cerr << "Error opening file for writing." << endl;
+        return;
+    }
+
+    for (const auto &node : nodes)
+    {
+        outFile.write( (char*)(&node.type), sizeof(node.type));
+        for (const auto kv : node.keyValuePairs)
+        {
+            outFile.write((char*)(&kv.first), sizeof(kv.first));
+            outFile.write((char*)(&kv.second), sizeof(kv.second));
+        }
+    }
+
+    outFile.close();
+}
+
+void SimpleInsert(Node &node, int RecordID, int Reference)
+{
+    int i = 0;
+    while (i < m && node.keyValuePairs[i].first != -1 && node.keyValuePairs[i].first < RecordID)
+    {
+        i++;
+    }
+
+
+    if (i < m && node.keyValuePairs[i].first == RecordID)
+    {
+        return;
+    }
+    else
+    {
+
+        for (int j = m - 1; j > i; --j)
+        {
+            node.keyValuePairs[j] = node.keyValuePairs[j - 1];
+        }
+        node.keyValuePairs[i] = {RecordID, Reference};
+    }
+}
+
+void splitRootNode(vector<Node> &nodes, int m, int newKey)
+{
+    int leftChildIndex = nodes[0].keyValuePairs[0].first;
+    int rightChildIndex = leftChildIndex + 1;
+
+    Node &leftChild = nodes[leftChildIndex];
+    Node &rightChild = nodes[rightChildIndex];
+    leftChild.type = 0;
+    rightChild.type = 0;
+
+    int medianKey = nodes[1].keyValuePairs[m / 2].first;
+    int medianIndex = newKey <= medianKey ? m / 2 : m / 2 + 1;
+
+    int maxKeyLeft = -1, maxKeyRight = -1;
+
+
+    for (int i = 0; i < medianIndex; ++i)
+    {
+        leftChild.keyValuePairs[i] = nodes[1].keyValuePairs[i];
+        maxKeyLeft = max(maxKeyLeft, leftChild.keyValuePairs[i].first);
+    }
+    for (int i = medianIndex; i < m; ++i)
+    {
+        rightChild.keyValuePairs[i - medianIndex] = nodes[1].keyValuePairs[i];
+        maxKeyRight = std::max(maxKeyRight, rightChild.keyValuePairs[i - medianIndex].first);
+        nodes[1].keyValuePairs[i] = make_pair(-1, -1);
+    }
+
+    nodes[1].type = 1;
+    nodes[1].keyValuePairs[0] = make_pair(maxKeyLeft, leftChildIndex);
+    nodes[1].keyValuePairs[1] = make_pair(maxKeyRight, rightChildIndex);
+
+    for (int i = 2; i < m; ++i)
+    {
+        nodes[1].keyValuePairs[i] = make_pair(-1, -1);
+    }
+}
+
+int splitChild(vector<Node> &nodes, int parentIndex, int childIndex, int newKey)
+{
+    Node &parent = nodes[parentIndex];
+    Node &child = nodes[childIndex];
+
+    int medianKey = child.keyValuePairs[m / 2].first;
+    int medianIndex = newKey <= medianKey ? m / 2 : m / 2 + 1;
+
+    // Create new node using first existing free node
+    int newChildIndex = nodes[0].keyValuePairs[0].first;
+    Node &newNode = nodes[newChildIndex];
+    newNode.type = 0;
+
+    for (int i = medianIndex; i < m; ++i)
+    {
+        newNode.keyValuePairs[i - medianIndex] = child.keyValuePairs[i];
+        child.keyValuePairs[i] = make_pair(-1, -1);
+    }
+
+    // depending on the new key and the chosen median
+    // determine which node index the new key-value pair will go to
+    // (the new child node or the other child node we are now splitting)
+    return newKey <= medianKey ? childIndex : newChildIndex;
+}
+
+void updateNextEmptyNodeIndex(vector<Node> &nodes)
+{
+    int newIndex = 1;
+    for (int i = 0; i < nodes.size(); i++)
+    {
+        // skip next free node indicator
+        if (i == 0)
+        {
+            continue;
+        }
+
+        if (nodes[i].type != -1)
+        {
+            newIndex++;
+        }
+    }
+
+    nodes[0].keyValuePairs[0].first = newIndex;
+}
+
+int findHighestKey(const vector<pair<int, int> > &keyValuePairs)
+{
+    int highestKey = numeric_limits<int>::min();
+
+    for (const auto &kv : keyValuePairs)
+    {
+        if (kv.first > highestKey)
+        {
+            highestKey = kv.first;
+        }
+    }
+
+    return highestKey;
+}
+
+void updateRootNodeContent(vector<Node> &nodes)
+{
+    Node &root = nodes[1];
+
+    for (int i = 0; i < root.keyValuePairs.size(); i++)
+    {
+        root.keyValuePairs[i] = make_pair(-1, -1);
+    }
+
+    for (int i = 2; i < nodes.size() && nodes[i].type == 0; i++)
+    {
+        int maxKeyForChildNode = findHighestKey(nodes[i].keyValuePairs);
+        SimpleInsert(root, maxKeyForChildNode, i);
+    }
 }
