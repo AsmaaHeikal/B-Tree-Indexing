@@ -2,24 +2,32 @@
 
 using namespace std;
 
-struct node{
-public:
-    int status;
-    int size;
-    int *arr;
+// struct node{
+// public:
+//     int status;
+//     int size;
+//     int *arr;
 
-    node(){
-        this->status = -1;
-    }
-    node(int m, int next) {
-        this->size = m * 2;
-        this->status = -1;
-        arr = new int[size];
-        arr[0] = next;
-        for (int i = 1; i < (size); ++i) {
-            arr[i] = -1;
-        }
-    }
+//     node(){
+//         this->status = -1;
+//     }
+//     node(int m, int next) {
+//         this->size = m * 2;
+//         this->status = -1;
+//         arr = new int[size];
+//         arr[0] = next;
+//         for (int i = 1; i < (size); ++i) {
+//             arr[i] = -1;
+//         }
+//     }
+// };
+
+struct Node
+{
+    int type;
+    vector<pair<int, int>> keyValuePairs;
+    bool isFull;
+    Node(int m) : type(-1), keyValuePairs(m, make_pair(-1, -1)) {}
 };
 
 void CreateIndexFile (char* filename, int numberOfRecords, int m);
