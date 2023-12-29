@@ -31,7 +31,7 @@ struct Node
     Node(int m) : type(-1), keyValuePairs(m, make_pair(-1, -1)) {}
 };
 
-void CreateIndexFile (char* filename, int numberOfRecords, int m);
+void CreateIndexFileFile (char* filename, int numberOfRecords, int m);
 int InsertNewRecordAtIndex (char* filename, int RecordID, int Reference);
 void DeleteRecordFromIndex (char* filename, int RecordID);
 void DisplayIndexFileContent (char* filename);
@@ -100,7 +100,7 @@ void DeleteRecordFromIndex (char* filename, int RecordID){
 
 }
 
-void CreateIndexFileFile(const char *filename, int numNodes, int m)
+void CreateIndexFileFile(char *filename, int numNodes, int m)
 {
     ofstream outFile(filename, ios::binary);
 
@@ -139,7 +139,7 @@ void CreateIndexFileFile(const char *filename, int numNodes, int m)
     outFile.close();
 }
 
-void DisplayIndexFileContent(const char *filename)
+void DisplayIndexFileContent(char *filename)
 {
     ifstream inFile(filename, ios::binary);
     if (!inFile.is_open())
