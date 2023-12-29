@@ -1,6 +1,7 @@
 #include<bits/stdc++.h>
 
 using namespace std;
+int n,m;
 
 // struct node{
 // public:
@@ -37,7 +38,8 @@ void DisplayIndexFileContent (char* filename);
 int SearchARecord (char* filename, int RecordID);
 
 int main() {
-    CreateIndexFile ("BTreeIndexFile.bin", 10, 5);
+    n=10, m=5;
+    CreateIndexFile ("BTreeIndexFile.bin", n, m);
 
     cout << "Welcome to the B-tree indexing file!:\n";
     while(true){
