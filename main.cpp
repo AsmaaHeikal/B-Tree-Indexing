@@ -9,6 +9,19 @@ struct Node
     vector<pair<int, int>> keyValuePairs;
     bool isFull;
     Node(int m) : type(-1), keyValuePairs(m, make_pair(-1, -1)) {}
+    //function to check if the node has greater than 2 elements
+    bool isSafeNode(){
+        int count=0;
+        for(int i=0;i<keyValuePairs.size();i++){
+            if(keyValuePairs[i].first!=-1){
+                count++;
+            }
+        }
+        if(count>=2){
+            return true;
+        }
+        return false;
+    }
 };
 
 // main functions
@@ -85,6 +98,8 @@ int main()
     cout << SearchARecord(filename, 20) << endl;
     cout << SearchARecord(filename, 16) << endl;
 
+//    DeleteRecordFromIndex(filename, 10);
+//    DisplayIndexFileContent(filename);
     // Main Menu
     //    cout << "Welcome to the B-tree indexing file!:\n";
     //    while(true){
@@ -120,8 +135,89 @@ int main()
     //}
 }
 
-void DeleteRecordFromIndex(char *filename, int RecordID)
-{
+void DeleteRecordFromIndex(char *filename, int RecordID){
+    vector<Node> nodes=loadBTreeInMemory(filename, n, m);
+    //check if the record is in the tree
+    int ans=SearchARecord(filename, RecordID);
+    if(ans==-1){
+        cout<<"Record not found!\n";
+        return;
+    }
+    //get the number of levels that the key is in
+    int level=0;
+    for(int i=0;i<nodes.size();i++){
+        for(int j=0;j<nodes[i].keyValuePairs.size();j++) {
+            if (nodes[i].keyValuePairs[j].first == RecordID) {
+                level++;
+            }
+        }
+    }
+    //get the index of the node that contains the record
+    int nodeIndex=0;
+    int keyIndex=0;
+    for(int i=0;i<nodes.size();i++){
+        if(nodes[i].type==0){
+            for(int j=0;j<nodes[i].keyValuePairs.size();j++){
+                if(nodes[i].keyValuePairs[j].first==RecordID){
+                    nodeIndex=i;
+                    keyIndex=j;
+                    break;
+                }
+            }
+        }
+    }
+    if(nodes[nodeIndex].keyValuePairs.size()-1>=2){
+        if(level==3||level==2){
+            //I want to put a pair of -1,-1 in the place of the key
+            nodes[nodeIndex].keyValuePairs[keyIndex].first=-1;
+            nodes[nodeIndex].keyValuePairs[keyIndex].second=-1;
+            //get the key that will replace the deleted key which is the last key in the node now
+            int newKey=nodes[nodeIndex].keyValuePairs[nodes[nodeIndex].keyValuePairs.size()-2].first;
+
+            if(level==2){
+                //i want to loop on the nodes which type is 1 and find the node that has the deleted key to replace it with the new key
+                for(int i=0;i<nodes.size();i++){
+                    if(nodes[i].type==1){
+                        for(int j=0;j<nodes[i].keyValuePairs.size();j++){
+                            if(nodes[i].keyValuePairs[j].first==RecordID){
+                                nodes[i].keyValuePairs[j].first=newKey;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            else if(level==3){
+                //first search for the key in the first node of nodes vector then it with the new key
+                for(int i=0;i<nodes[1].keyValuePairs.size();i++){
+                    if(nodes[1].keyValuePairs[i].first==RecordID){
+                        nodes[1].keyValuePairs[i].first=newKey;
+                        break;
+                    }
+                }
+                //then search in nodes that have type 1 for the deleted key with skipping the first node and replace the key with the new key
+                for(int i=2;i<nodes.size();i++){
+                    if(nodes[i].type==1){
+                        for(int j=0;j<nodes[i].keyValuePairs.size();j++){
+                            if(nodes[i].keyValuePairs[j].first==RecordID){
+                                nodes[i].keyValuePairs[j].first=newKey;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        else if(level==1){
+            //i want to shif the elements to the left by one
+            for(int i=keyIndex;i<nodes[nodeIndex].keyValuePairs.size()-1;i++){
+                nodes[nodeIndex].keyValuePairs[i]=nodes[nodeIndex].keyValuePairs[i+1];
+            }
+            nodes[nodeIndex].keyValuePairs[nodes[nodeIndex].keyValuePairs.size()-1].first=-1;
+            nodes[nodeIndex].keyValuePairs[nodes[nodeIndex].keyValuePairs.size()-1].second=-1;
+        }
+    }
+    writeBTreeToFile(filename, nodes, m);
 }
 
 void CreateIndexFileFile(char *filename, int numberOfRecords, int m)
