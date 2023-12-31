@@ -176,7 +176,6 @@ void DeleteRecordFromIndex(char *filename, int RecordID){
             nodes[nodeIndex].keyValuePairs[keyIndex].second=-1;
             //get the key that will replace the deleted key which is the last key in the node now
             int newKey=nodes[nodeIndex].keyValuePairs[keyIndex-1].first;
-            cout<<newKey<<endl;
 
             if(level==2){
                 //i want to loop on the nodes which type is 1 and find the node that has the deleted key to replace it with the new key
@@ -227,7 +226,6 @@ void DeleteRecordFromIndex(char *filename, int RecordID){
 
         //get the last element in my node
         int lastKeyInCurrentNode=nodes[nodeIndex].keyValuePairs[NodeSize-1].first;
-        cout<<lastKeyInCurrentNode<<endl;
         Node leftNode(m);
         Node rightNode(m);
         int leftNodeIndex=0;
