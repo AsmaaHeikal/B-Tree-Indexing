@@ -34,86 +34,32 @@ int splitChild(vector<Node> &nodes, int parentIndex, int childIndex, int newKey)
 void updateRootNodeContent(vector<Node> &nodes);
 
 void updateNextEmptyNodeIndex(vector<Node> &nodes);
-void initializeFileWithData(const char* filename) {
-    ofstream outFile(filename, ios::binary);
-
-    if (!outFile.is_open()) {
-        cerr << "Error opening file for writing." << endl;
-        return;
-    }
-
-    // Data to initialize the file
-    vector<Node> data= loadBTreeInMemory("btree_index.bin", 10, 5);
-    data[0].type=-11;
-    data[0].keyValuePairs={make_pair(-1,-1),make_pair(-1,-1),make_pair(-1,-1),make_pair(-1,-1),make_pair(-1,-1)};
-    data[1].type=1;
-    data[1].keyValuePairs={make_pair(10,8),make_pair(32,9),make_pair(-1,-1),make_pair(-1,-1),make_pair(-1,-1)};
-    data[2].type=0;
-    data[2].keyValuePairs={make_pair(1,120),make_pair(2,144),make_pair(3,12),make_pair(-1,-1),make_pair(-1,-1)};
-    data[3].type=0;
-    data[3].keyValuePairs={make_pair(11,192),make_pair(14,72),make_pair(12,204),make_pair(15,108),make_pair(-1,-1)};
-    data[4].type=0;
-    data[4].keyValuePairs={make_pair(5,132),make_pair(6,180),make_pair(7,24),make_pair(-1,-1),make_pair(-1,-1)};
-    data[5].type=0;
-    data[5].keyValuePairs={make_pair(8,156),make_pair(9,168),make_pair(10,48),make_pair(-1,-1),make_pair(-1,-1)};
-    data[6].type=0;
-    data[6].keyValuePairs={make_pair(17,216),make_pair(18,228),make_pair(19,84),make_pair(-1,-1),make_pair(-1,-1)};
-    data[7].type=0;
-    data[7].keyValuePairs={make_pair(24,60),make_pair(30,196),make_pair(32,240),make_pair(-1,-1),make_pair(-1,-1)};
-    data[8].type=1;
-    data[8].keyValuePairs={make_pair(3,2),make_pair(7,4),make_pair(10,5),make_pair(-1,-1),make_pair(-1,-1)};
-    data[9].type=1;
-    data[9].keyValuePairs={make_pair(15,3),make_pair(19,6),make_pair(32,7),make_pair(-1,-1),make_pair(-1,-1)};
-
-//    vector<Node> data = {
-//            {-1, {{-1, -1}, {-1, -1}, {-1, -1}, {-1, -1}, {-1, -1}}},
-//            {1, {{10, 8}, {32, 9}, {-1, -1}, {-1, -1}, {-1, -1}}},
-//            {0, {{1, 120}, {2, 144}, {3, 12}, {-1, -1}, {-1, -1}}},
-//            {0, {{11, 192}, {14, 72}, {12, 204}, {15, 108}, {-1, -1}}},
-//            {0, {{5, 132}, {6, 180}, {7, 24}, {-1, -1}, {-1, -1}}},
-//            {0, {{8, 156}, {9, 168}, {10, 48}, {-1, -1}, {-1, -1}}},
-//            {0, {{17, 216}, {18, 228}, {19, 84}, {-1, -1}, {-1, -1}}},
-//            {0, {{24, 60}, {30, 196}, {32, 240}, {-1, -1}, {-1, -1}}},
-//            {1, {{3, 2}, {7, 4}, {10, 5}, {-1, -1}, {-1, -1}}},
-//            {1, {{15, 3}, {19, 6}, {32, 7}, {-1, -1}, {-1, -1}}
-//    }};
-
-    for (const auto& node : data) {
-        outFile.write((char*)&node.type, sizeof(node.type));
-        for (const auto& kv : node.keyValuePairs) {
-            outFile.write((char*)&kv.first, sizeof(kv.first));
-            outFile.write((char*)&kv.second, sizeof(kv.second));
-        }
-    }
-
-    outFile.close();
-}
+void initializeFileWithData(const char* filename);
 int main()
 {
     char filename[] = "btree_index.bin";
     n = 10, m = 5;
     CreateIndexFileFile(filename, n, m);
-//    InsertNewRecordAtIndex(filename, 3, 12);
-//    InsertNewRecordAtIndex(filename, 7, 24);
-//    InsertNewRecordAtIndex(filename, 10, 48);
-//    InsertNewRecordAtIndex(filename, 24, 60);
-//    InsertNewRecordAtIndex(filename, 14, 72);
-//    InsertNewRecordAtIndex(filename, 19, 48);
-//    InsertNewRecordAtIndex(filename, 30, 96);
-//    InsertNewRecordAtIndex(filename, 15, 108);
-//    InsertNewRecordAtIndex(filename, 1, 120);
-//    InsertNewRecordAtIndex(filename, 5, 132);
-//
-//    InsertNewRecordAtIndex(filename, 2, 144);
-//
-//    InsertNewRecordAtIndex(filename, 8, 156);
-//    InsertNewRecordAtIndex(filename, 9, 168);
-//    InsertNewRecordAtIndex(filename, 6, 180);
-//    InsertNewRecordAtIndex(filename, 11, 192);
-//    InsertNewRecordAtIndex(filename, 12, 204);
-//    InsertNewRecordAtIndex(filename, 18, 228);
-//    InsertNewRecordAtIndex(filename, 17, 216);
-    initializeFileWithData(filename);
+    InsertNewRecordAtIndex(filename, 3, 12);
+    InsertNewRecordAtIndex(filename, 7, 24);
+    InsertNewRecordAtIndex(filename, 10, 48);
+    InsertNewRecordAtIndex(filename, 24, 60);
+    InsertNewRecordAtIndex(filename, 14, 72);
+    InsertNewRecordAtIndex(filename, 19, 48);
+    InsertNewRecordAtIndex(filename, 30, 96);
+    InsertNewRecordAtIndex(filename, 15, 108);
+    InsertNewRecordAtIndex(filename, 1, 120);
+    InsertNewRecordAtIndex(filename, 5, 132);
+
+    InsertNewRecordAtIndex(filename, 2, 144);
+
+    InsertNewRecordAtIndex(filename, 8, 156);
+    InsertNewRecordAtIndex(filename, 9, 168);
+    InsertNewRecordAtIndex(filename, 6, 180);
+    InsertNewRecordAtIndex(filename, 11, 192);
+    InsertNewRecordAtIndex(filename, 12, 204);
+    InsertNewRecordAtIndex(filename, 18, 228);
+    InsertNewRecordAtIndex(filename, 17, 216);
     DisplayIndexFileContent(filename);
 
     cout << SearchARecord(filename, 3) << endl;
@@ -143,12 +89,12 @@ int main()
     DisplayIndexFileContent(filename);
     DeleteRecordFromIndex(filename, 9);
     DisplayIndexFileContent(filename);
-    DeleteRecordFromIndex(filename, 8);
+    DeleteRecordFromIndex(filename, 7);
     DisplayIndexFileContent(filename);
-//    DeleteRecordFromIndex(filename, 15);
-//    DisplayIndexFileContent(filename);
-//    DeleteRecordFromIndex(filename, 11);
-//    DisplayIndexFileContent(filename);
+    DeleteRecordFromIndex(filename, 15);
+    DisplayIndexFileContent(filename);
+    DeleteRecordFromIndex(filename, 11);
+    DisplayIndexFileContent(filename);
     // Main Menu
     //    cout << "Welcome to the B-tree indexing file!:\n";
     //    while(true){
@@ -280,7 +226,6 @@ void DeleteRecordFromIndex(char *filename, int RecordID){
 
         //get the last element in my node
         int lastKeyInCurrentNode=nodes[nodeIndex].keyValuePairs[NodeSize-1].first;
-        cout<<"last"<<lastKeyInCurrentNode<<endl;
         Node leftNode(m);
         Node rightNode(m);
         int leftNodeIndex=0;
@@ -303,14 +248,11 @@ void DeleteRecordFromIndex(char *filename, int RecordID){
                 }
             }
         }
-        cout<<"parentNodeIndex"<<parentNodeIndex<<endl;
-        cout<<"parentKeyIndex"<<parentKeyIndex<<endl;
         for (int i = 0; i < nodes.size(); i++) {
             if (nodes[i].type == 1) {
                 for (int j = 0; j < nodes[i].keyValuePairs.size(); j++) {
                     if (nodes[i].keyValuePairs[j].first == lastKeyInCurrentNode) {
                         char s[] = "btree_index.bin";
-                        cout<<"i"<<i<<endl;
                         //nodes[i].keyValuePairs[j-1].second!= SearchARecord(s, nodes[i].keyValuePairs[j-1].first)
                         if(nodes[parentNodeIndex].keyValuePairs[parentKeyIndex-1].second!= SearchARecord(s, nodes[parentNodeIndex].keyValuePairs[parentKeyIndex-1].first)){
 
@@ -340,10 +282,6 @@ void DeleteRecordFromIndex(char *filename, int RecordID){
                 rightNodeSize++;
             }
         }
-        cout<<level<<endl;
-        cout<<leftNodeSize<<endl;
-        cout<<rightNodeSize<<endl;
-        cout<<noRightNode<<endl;
         if(!noLeftNode&&leftNodeSize>2){
             //get the key which is the last key in left node
             int newKey=leftNode.keyValuePairs[leftNodeSize-1].first;
@@ -464,7 +402,6 @@ void DeleteRecordFromIndex(char *filename, int RecordID){
             }
         }
         else{
-            cout<<"**********"<<endl;
             //merge the left node with the current node
 
             //get the first key and the second key in current node
@@ -514,7 +451,6 @@ void DeleteRecordFromIndex(char *filename, int RecordID){
                 }
             }
             else{
-                cout<<"#######"<<endl;
                 //put first key in current node in the last place in left node
                 char s[] ="btree_index.bin";
                 leftNode.keyValuePairs[leftNodeSize].first=firstKeyInCurrentNode;
@@ -546,7 +482,6 @@ void DeleteRecordFromIndex(char *filename, int RecordID){
                                 for (int k = j; k < nodes[i].keyValuePairs.size() - 1; k++) {
                                     nodes[i].keyValuePairs[k].first = nodes[i].keyValuePairs[k + 1].first;
                                 }
-                                cout<<"INodeSize "<<INodeSize<<endl;
                                 nodes[i].keyValuePairs[INodeSize-1].first = -1;
                                 nodes[i].keyValuePairs[INodeSize-1].second = -1;
                                 break;
@@ -990,4 +925,59 @@ void updateRootNodeContent(vector<Node> &nodes)
         int maxKeyForChildNode = findHighestKey(nodes[i].keyValuePairs);
         SimpleInsert(root, maxKeyForChildNode, i);
     }
+}
+
+void initializeFileWithData(const char* filename) {
+    ofstream outFile(filename, ios::binary);
+
+    if (!outFile.is_open()) {
+        cerr << "Error opening file for writing." << endl;
+        return;
+    }
+
+    // Data to initialize the file
+    vector<Node> data= loadBTreeInMemory("btree_index.bin", 10, 5);
+    data[0].type=-11;
+    data[0].keyValuePairs={make_pair(-1,-1),make_pair(-1,-1),make_pair(-1,-1),make_pair(-1,-1),make_pair(-1,-1)};
+    data[1].type=1;
+    data[1].keyValuePairs={make_pair(10,8),make_pair(32,9),make_pair(-1,-1),make_pair(-1,-1),make_pair(-1,-1)};
+    data[2].type=0;
+    data[2].keyValuePairs={make_pair(1,120),make_pair(2,144),make_pair(3,12),make_pair(-1,-1),make_pair(-1,-1)};
+    data[3].type=0;
+    data[3].keyValuePairs={make_pair(11,192),make_pair(14,72),make_pair(12,204),make_pair(15,108),make_pair(-1,-1)};
+    data[4].type=0;
+    data[4].keyValuePairs={make_pair(5,132),make_pair(6,180),make_pair(7,24),make_pair(-1,-1),make_pair(-1,-1)};
+    data[5].type=0;
+    data[5].keyValuePairs={make_pair(8,156),make_pair(9,168),make_pair(10,48),make_pair(-1,-1),make_pair(-1,-1)};
+    data[6].type=0;
+    data[6].keyValuePairs={make_pair(17,216),make_pair(18,228),make_pair(19,84),make_pair(-1,-1),make_pair(-1,-1)};
+    data[7].type=0;
+    data[7].keyValuePairs={make_pair(24,60),make_pair(30,196),make_pair(32,240),make_pair(-1,-1),make_pair(-1,-1)};
+    data[8].type=1;
+    data[8].keyValuePairs={make_pair(3,2),make_pair(7,4),make_pair(10,5),make_pair(-1,-1),make_pair(-1,-1)};
+    data[9].type=1;
+    data[9].keyValuePairs={make_pair(15,3),make_pair(19,6),make_pair(32,7),make_pair(-1,-1),make_pair(-1,-1)};
+
+//    vector<Node> data = {
+//            {-1, {{-1, -1}, {-1, -1}, {-1, -1}, {-1, -1}, {-1, -1}}},
+//            {1, {{10, 8}, {32, 9}, {-1, -1}, {-1, -1}, {-1, -1}}},
+//            {0, {{1, 120}, {2, 144}, {3, 12}, {-1, -1}, {-1, -1}}},
+//            {0, {{11, 192}, {14, 72}, {12, 204}, {15, 108}, {-1, -1}}},
+//            {0, {{5, 132}, {6, 180}, {7, 24}, {-1, -1}, {-1, -1}}},
+//            {0, {{8, 156}, {9, 168}, {10, 48}, {-1, -1}, {-1, -1}}},
+//            {0, {{17, 216}, {18, 228}, {19, 84}, {-1, -1}, {-1, -1}}},
+//            {0, {{24, 60}, {30, 196}, {32, 240}, {-1, -1}, {-1, -1}}},
+//            {1, {{3, 2}, {7, 4}, {10, 5}, {-1, -1}, {-1, -1}}},
+//            {1, {{15, 3}, {19, 6}, {32, 7}, {-1, -1}, {-1, -1}}
+//    }};
+
+    for (const auto& node : data) {
+        outFile.write((char*)&node.type, sizeof(node.type));
+        for (const auto& kv : node.keyValuePairs) {
+            outFile.write((char*)&kv.first, sizeof(kv.first));
+            outFile.write((char*)&kv.second, sizeof(kv.second));
+        }
+    }
+
+    outFile.close();
 }
