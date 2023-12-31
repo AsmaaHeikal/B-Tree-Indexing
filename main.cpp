@@ -719,9 +719,9 @@ int InsertNewRecordAtIndex(char *filename, int RecordID, int Reference)
                 updateRootNodeContent(nodes);
                 updateNextEmptyNodeIndex(nodes);
             }
-
+            else{
             SimpleInsert(nodes[childIndex], RecordID, Reference);
-
+            }
             // in case the new key than the existing key in root
             // update the key with the one of highest value
             node.keyValuePairs[i].first = findHighestKey(nodes[childIndex].keyValuePairs);
