@@ -9,19 +9,6 @@ struct Node
     vector<pair<int, int>> keyValuePairs;
     bool isFull;
     Node(int m) : type(-1), keyValuePairs(m, make_pair(-1, -1)) {}
-    //function to check if the node has greater than 2 elements
-    bool isSafeNode(){
-        int count=0;
-        for(int i=0;i<keyValuePairs.size();i++){
-            if(keyValuePairs[i].first!=-1){
-                count++;
-            }
-        }
-        if(count>=2){
-            return true;
-        }
-        return false;
-    }
 };
 
 // main functions
@@ -98,8 +85,16 @@ int main()
     cout << SearchARecord(filename, 20) << endl;
     cout << SearchARecord(filename, 16) << endl;
 
-//    DeleteRecordFromIndex(filename, 10);
-//    DisplayIndexFileContent(filename);
+    DeleteRecordFromIndex(filename, 10);
+    DisplayIndexFileContent(filename);
+    DeleteRecordFromIndex(filename, 9);
+    DisplayIndexFileContent(filename);
+    DeleteRecordFromIndex(filename, 7);
+    DisplayIndexFileContent(filename);
+    DeleteRecordFromIndex(filename, 15);
+    DisplayIndexFileContent(filename);
+    DeleteRecordFromIndex(filename, 11);
+    DisplayIndexFileContent(filename);
     // Main Menu
     //    cout << "Welcome to the B-tree indexing file!:\n";
     //    while(true){
@@ -166,13 +161,22 @@ void DeleteRecordFromIndex(char *filename, int RecordID){
             }
         }
     }
-    if(nodes[nodeIndex].keyValuePairs.size()-1>=2){
+
+    //calc the actual number of keys in the node
+    int NodeSize=0;
+    for(int i=0;i<nodes[nodeIndex].keyValuePairs.size();i++){
+        if(nodes[nodeIndex].keyValuePairs[i].first!=-1){
+            NodeSize++;
+        }
+    }
+    if(NodeSize>2){
         if(level==3||level==2){
             //I want to put a pair of -1,-1 in the place of the key
             nodes[nodeIndex].keyValuePairs[keyIndex].first=-1;
             nodes[nodeIndex].keyValuePairs[keyIndex].second=-1;
             //get the key that will replace the deleted key which is the last key in the node now
-            int newKey=nodes[nodeIndex].keyValuePairs[nodes[nodeIndex].keyValuePairs.size()-2].first;
+            int newKey=nodes[nodeIndex].keyValuePairs[keyIndex-1].first;
+            cout<<newKey<<endl;
 
             if(level==2){
                 //i want to loop on the nodes which type is 1 and find the node that has the deleted key to replace it with the new key
@@ -187,20 +191,20 @@ void DeleteRecordFromIndex(char *filename, int RecordID){
                     }
                 }
             }
-            else if(level==3){
+            else {
                 //first search for the key in the first node of nodes vector then it with the new key
-                for(int i=0;i<nodes[1].keyValuePairs.size();i++){
-                    if(nodes[1].keyValuePairs[i].first==RecordID){
-                        nodes[1].keyValuePairs[i].first=newKey;
+                for (int i = 0; i < nodes[1].keyValuePairs.size(); i++) {
+                    if (nodes[1].keyValuePairs[i].first == RecordID) {
+                        nodes[1].keyValuePairs[i].first = newKey;
                         break;
                     }
                 }
                 //then search in nodes that have type 1 for the deleted key with skipping the first node and replace the key with the new key
-                for(int i=2;i<nodes.size();i++){
-                    if(nodes[i].type==1){
-                        for(int j=0;j<nodes[i].keyValuePairs.size();j++){
-                            if(nodes[i].keyValuePairs[j].first==RecordID){
-                                nodes[i].keyValuePairs[j].first=newKey;
+                for (int i = 2; i < nodes.size(); i++) {
+                    if (nodes[i].type == 1) {
+                        for (int j = 0; j < nodes[i].keyValuePairs.size(); j++) {
+                            if (nodes[i].keyValuePairs[j].first == RecordID) {
+                                nodes[i].keyValuePairs[j].first = newKey;
                                 break;
                             }
                         }
@@ -210,11 +214,271 @@ void DeleteRecordFromIndex(char *filename, int RecordID){
         }
         else if(level==1){
             //i want to shif the elements to the left by one
-            for(int i=keyIndex;i<nodes[nodeIndex].keyValuePairs.size()-1;i++){
+            for(int i=keyIndex;i<NodeSize-1;i++){
                 nodes[nodeIndex].keyValuePairs[i]=nodes[nodeIndex].keyValuePairs[i+1];
             }
-            nodes[nodeIndex].keyValuePairs[nodes[nodeIndex].keyValuePairs.size()-1].first=-1;
-            nodes[nodeIndex].keyValuePairs[nodes[nodeIndex].keyValuePairs.size()-1].second=-1;
+            nodes[nodeIndex].keyValuePairs[NodeSize-1].first=-1;
+            nodes[nodeIndex].keyValuePairs[NodeSize-1].second=-1;
+        }
+    }
+    else{
+        //check if the predecessor on my parent node has more than 2 keys
+        //get the predecessor node
+
+        //get the last element in my node
+        int lastKeyInCurrentNode=nodes[nodeIndex].keyValuePairs[NodeSize-1].first;
+        cout<<lastKeyInCurrentNode<<endl;
+        Node leftNode(m);
+        Node rightNode(m);
+        int leftNodeIndex=0;
+        int rightNodeIndex=0;
+        bool noLeftNode=true;
+        bool noRightNode=true;
+        for (int i = 0; i < nodes.size(); i++) {
+            if (nodes[i].type == 1) {
+                for (int j = 0; j < nodes[i].keyValuePairs.size(); j++) {
+                    if (nodes[i].keyValuePairs[j].first == lastKeyInCurrentNode) {
+                        char s[] = "btree_index.bin";
+                        if(nodes[i].keyValuePairs[j-1].second!= SearchARecord(s, nodes[i].keyValuePairs[j-1].first)){
+
+                            leftNode=nodes[nodes[i].keyValuePairs[j-1].second];
+                            leftNodeIndex=nodes[i].keyValuePairs[j-1].second;
+                            noLeftNode=false;
+                        }
+                        if(nodes[i].keyValuePairs[j+1].second!= SearchARecord(s, nodes[i].keyValuePairs[j+1].first)){
+                            rightNode=nodes[nodes[i].keyValuePairs[j+1].second];
+                            rightNodeIndex=nodes[i].keyValuePairs[j+1].second;
+                            noRightNode=false;
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+        int leftNodeSize=0;
+        int rightNodeSize=0;
+        for(int i=0;i<leftNode.keyValuePairs.size();i++){
+            if(leftNode.keyValuePairs[i].first!=-1){
+                leftNodeSize++;
+            }
+        }
+        for(int i=0;i<rightNode.keyValuePairs.size();i++){
+            if(rightNode.keyValuePairs[i].first!=-1){
+                rightNodeSize++;
+            }
+        }
+
+        if(!noLeftNode&&leftNodeSize>2){
+            //get the key which is the last key in left node
+            int newKey=leftNode.keyValuePairs[leftNodeSize-1].first;
+            //get its reference
+            int newReference=leftNode.keyValuePairs[leftNodeSize-1].second;
+            int keyBeforeNewKey=leftNode.keyValuePairs[leftNodeSize-2].first;
+
+            //i want to loop on the nodes which type is 1 and find the node that has the deleted key to replace it with the new key
+            for(auto & node : nodes){
+                if(node.type==1){
+                    for(int j=0;j<node.keyValuePairs.size();j++){
+                        if(node.keyValuePairs[j].first==newKey){
+                            node.keyValuePairs[j].first=keyBeforeNewKey;
+                            break;
+                        }
+                    }
+                }
+            }
+            //remove the last key in left node
+            leftNode.keyValuePairs[leftNodeSize-1].first=-1;
+            leftNode.keyValuePairs[leftNodeSize-1].second=-1;
+            nodes[leftNodeIndex]=leftNode;
+            //now i want to shift the elements from beginning to the right by one until reaching the deleted key
+            for(int i=0;i<keyIndex;i++){
+                nodes[nodeIndex].keyValuePairs[i+1]=nodes[nodeIndex].keyValuePairs[i];
+            }
+            //now i want to put the new key in the first place in the node
+            nodes[nodeIndex].keyValuePairs[0].first=newKey;
+            nodes[nodeIndex].keyValuePairs[0].second=newReference;
+            //now i want to delete the deleted key from all levels
+            if(level==3||level==2){
+                //I want to put a pair of -1,-1 in the place of the key
+//                nodes[nodeIndex].keyValuePairs[keyIndex].first=-1;
+//                nodes[nodeIndex].keyValuePairs[keyIndex].second=-1;
+                //get the key that will replace the deleted key which is the last key in the node now
+                int newKey=nodes[nodeIndex].keyValuePairs[NodeSize-1].first;
+
+                if(level==2){
+                    //i want to loop on the nodes which type is 1 and find the node that has the deleted key to replace it with the new key
+                    for(int i=0;i<nodes.size();i++){
+                        if(nodes[i].type==1){
+                            for(int j=0;j<nodes[i].keyValuePairs.size();j++){
+                                if(nodes[i].keyValuePairs[j].first==RecordID){
+                                    nodes[i].keyValuePairs[j].first=newKey;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+                else {
+                    //first search for the key in the first node of nodes vector then it with the new key
+                    for (int i = 0; i < nodes[1].keyValuePairs.size(); i++) {
+                        if (nodes[1].keyValuePairs[i].first == RecordID) {
+                            nodes[1].keyValuePairs[i].first = newKey;
+                            break;
+                        }
+                    }
+                    //then search in nodes that have type 1 for the deleted key with skipping the first node and replace the key with the new key
+                    for (int i = 2; i < nodes.size(); i++) {
+                        if (nodes[i].type == 1) {
+                            for (int j = 0; j < nodes[i].keyValuePairs.size(); j++) {
+                                if (nodes[i].keyValuePairs[j].first == RecordID) {
+                                    nodes[i].keyValuePairs[j].first = newKey;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            else if(level==1){
+                //i want to shift the elements to the left by one
+                for(int i=keyIndex;i<NodeSize-1;i++){
+                    nodes[nodeIndex].keyValuePairs[i]=nodes[nodeIndex].keyValuePairs[i+1];
+                }
+                nodes[nodeIndex].keyValuePairs[NodeSize-1].first=-1;
+                nodes[nodeIndex].keyValuePairs[NodeSize-1].second=-1;
+            }
+        }
+        else if(!noRightNode&&rightNodeSize>2) {
+            //get the key which is the first key in right node
+            int newKey=rightNode.keyValuePairs[0].first;
+            //get its reference
+            int newReference=rightNode.keyValuePairs[0].second;
+            //shift the elements in right node to the left by one
+            for(int i=0;i<rightNodeSize-1;i++){
+                rightNode.keyValuePairs[i]=rightNode.keyValuePairs[i+1];
+            }
+            //remove the last key in right node
+            rightNode.keyValuePairs[rightNodeSize-1].first=-1;
+            rightNode.keyValuePairs[rightNodeSize-1].second=-1;
+            nodes[rightNodeIndex]=rightNode;
+            //now i will delete the deleted key from the current node and shift items to the left by one and add the new key in the last place
+            for(int i=keyIndex;i<NodeSize-1;i++){
+                nodes[nodeIndex].keyValuePairs[i]=nodes[nodeIndex].keyValuePairs[i+1];
+            }
+            //now i want to put the new key in the last place in the node
+            nodes[nodeIndex].keyValuePairs[NodeSize-1].first=newKey;
+            nodes[nodeIndex].keyValuePairs[NodeSize-1].second=newReference;
+            //now i want to delete the deleted key from the nodes that have type 1 except the first node
+            for(int i=0;i<nodes.size();i++){
+                if(nodes[i].type==1){
+                    for(int j=0;j<nodes[i].keyValuePairs.size();j++){
+                        if(nodes[i].keyValuePairs[j].first==lastKeyInCurrentNode){
+                            nodes[i].keyValuePairs[j].first=newKey;
+                            break;
+                        }
+                    }
+                }
+//            }
+//            //now i want to delete the deleted key from the first node
+//            for(int i=0;i<nodes[1].keyValuePairs.size();i++){
+//                if(nodes[1].keyValuePairs[i].first==lastKeyInCurrentNode){
+//                    nodes[1].keyValuePairs[i].first=newKey;
+//                    break;
+//                }
+            }
+        }
+        else{
+            //merge the left node with the current node
+
+            //get the first key and the second key in current node
+            int firstKeyInCurrentNode=nodes[nodeIndex].keyValuePairs[0].first;
+            int secondKeyInCurrentNode=nodes[nodeIndex].keyValuePairs[1].first;
+
+            //put the type of the node to -1
+            nodes[nodeIndex].type=-1;
+            //delete all the keys in the current node
+            for(int i=0;i<nodes[nodeIndex].keyValuePairs.size();i++){
+                nodes[nodeIndex].keyValuePairs[i].first=-1;
+                nodes[nodeIndex].keyValuePairs[i].second=-1;
+            }
+            //update the first key in the zero node to be the index of the empty node
+            nodes[0].keyValuePairs[0].first=nodeIndex;
+
+            //get the last key in left node
+            int lastKeyInLeftNode=leftNode.keyValuePairs[leftNodeSize-1].first;
+
+            //check if the deleted key is in the first element in the node or the second
+            if(keyIndex==0){
+                //add pair to the left node,the pair contains the second key in the current node and its reference
+                char s[] ="btree_index.bin";
+                leftNode.keyValuePairs[leftNodeSize].first=secondKeyInCurrentNode;
+                leftNode.keyValuePairs[leftNodeSize].second=SearchARecord( s,secondKeyInCurrentNode);
+//                leftNode.keyValuePairs.insert(leftNode.keyValuePairs.end(),make_pair(secondKeyInCurrentNode,SearchARecord( s,secondKeyInCurrentNode)));
+                //find the node that contains the last Key in left node and shift the elements from the end to the right by one
+                for(int i=0;i<nodes.size();i++){
+                    if(nodes[i].type==1){
+                        for(int j=0;j<nodes[i].keyValuePairs.size();j++){
+                            if(nodes[i].keyValuePairs[j].first==lastKeyInLeftNode) {
+                                //get the actual number of keys in the node
+                                int INodeSize=0;
+                                for(int i=0;i<nodes[i].keyValuePairs.size();i++){
+                                    if(nodes[i].keyValuePairs[i].first!=-1){
+                                        INodeSize++;
+                                    }
+                                }
+                                for (int k = j; k < nodes[i].keyValuePairs.size() - 1; k++) {
+                                    nodes[i].keyValuePairs[k] = nodes[i].keyValuePairs[k + 1];
+                                }
+                                nodes[i].keyValuePairs[INodeSize+1].first = -1;
+                                nodes[i].keyValuePairs[INodeSize+1].second = -1;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            else{
+                //put first key in current node in the last place in left node
+                char s[] ="btree_index.bin";
+                leftNode.keyValuePairs[leftNodeSize].first=firstKeyInCurrentNode;
+                leftNode.keyValuePairs[leftNodeSize].second=SearchARecord(s,firstKeyInCurrentNode);
+//                leftNode.keyValuePairs.insert(leftNode.keyValuePairs.end(),make_pair(firstKeyInCurrentNode,SearchARecord(s,firstKeyInCurrentNode)));
+                //loop on the tree and if found the deleted key replace it with the second key in current node
+                for(auto & node : nodes){
+                    if(node.type==1){
+                        for(int j=0;j<node.keyValuePairs.size();j++){
+                            if(node.keyValuePairs[j].first==RecordID){
+                                node.keyValuePairs[j].first=firstKeyInCurrentNode;
+                                break;
+                            }
+                        }
+                    }
+                }
+                //find the node that contains the last Key in left node and shift the elements from the end to the right by one
+                for(int i=0;i<nodes.size();i++){
+                    if(nodes[i].type==1){
+                        for(int j=0;j<nodes[i].keyValuePairs.size();j++){
+                            if(nodes[i].keyValuePairs[j].first==lastKeyInLeftNode) {
+                                //get the actual number of keys in the node
+                                int INodeSize=0;
+                                for(int i=0;i<nodes[i].keyValuePairs.size();i++){
+                                    if(nodes[i].keyValuePairs[i].first!=-1){
+                                        INodeSize++;
+                                    }
+                                }
+                                for (int k = j; k < nodes[i].keyValuePairs.size() - 1; k++) {
+                                    nodes[i].keyValuePairs[k] = nodes[i].keyValuePairs[k + 1];
+                                }
+                                nodes[i].keyValuePairs[INodeSize+1].first = -1;
+                                nodes[i].keyValuePairs[INodeSize+1].second = -1;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            //update the left node in the nodes vector
+            nodes[leftNodeIndex]=leftNode;
         }
     }
     writeBTreeToFile(filename, nodes, m);
