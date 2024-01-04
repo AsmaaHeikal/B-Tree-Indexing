@@ -26,6 +26,8 @@ void writeBTreeToFile(char *filename, const vector<Node> nodes, int m);
 int findHighestKey(const vector<pair<int, int>> &keyValuePairs);
 
 void splitRootNode(vector<Node> &nodes, int m, int newKey);
+void splitParentRootNode(vector<Node> &nodes, int m, int newKey);
+
 
 void SimpleInsert(Node &node, int RecordID, int Reference);
 
@@ -710,7 +712,20 @@ int InsertNewRecordAtIndex(char *filename, int RecordID, int Reference)
                 i = m - 1;
             }
 
-            if (nodes[childIndex].isFull)
+            if (nodes[childIndex].isFull && node.isFull)
+            {
+                int newChildIndex = splitChild(nodes, 1, childIndex, RecordID);
+
+                SimpleInsert(nodes[newChildIndex], RecordID, Reference);
+
+                updateNextEmptyNodeIndex(nodes);
+                splitParentRootNode(nodes, m, RecordID);
+
+                int rootNodeIndex = nodes[1].type == 0 ? 1 : (RecordID < nodes[1].keyValuePairs[0].first ? 8 : 9);
+                SimpleInsert(nodes[rootNodeIndex], RecordID, Reference);
+
+            }
+            else if (nodes[childIndex].isFull)
             {
                 int newChildIndex = splitChild(nodes, 1, childIndex, RecordID);
 
@@ -823,6 +838,42 @@ void splitRootNode(vector<Node> &nodes, int m, int newKey)
     Node &rightChild = nodes[rightChildIndex];
     leftChild.type = 0;
     rightChild.type = 0;
+
+    int medianKey = nodes[1].keyValuePairs[m / 2].first;
+    int medianIndex = newKey <= medianKey ? m / 2 : m / 2 + 1;
+
+    int maxKeyLeft = -1, maxKeyRight = -1;
+
+    for (int i = 0; i < medianIndex; ++i)
+    {
+        leftChild.keyValuePairs[i] = nodes[1].keyValuePairs[i];
+        maxKeyLeft = max(maxKeyLeft, leftChild.keyValuePairs[i].first);
+    }
+    for (int i = medianIndex; i < m; ++i)
+    {
+        rightChild.keyValuePairs[i - medianIndex] = nodes[1].keyValuePairs[i];
+        maxKeyRight = std::max(maxKeyRight, rightChild.keyValuePairs[i - medianIndex].first);
+        nodes[1].keyValuePairs[i] = make_pair(-1, -1);
+    }
+
+    nodes[1].type = 1;
+    nodes[1].keyValuePairs[0] = make_pair(maxKeyLeft, leftChildIndex);
+    nodes[1].keyValuePairs[1] = make_pair(maxKeyRight, rightChildIndex);
+
+    for (int i = 2; i < m; ++i)
+    {
+        nodes[1].keyValuePairs[i] = make_pair(-1, -1);
+    }
+}
+void splitParentRootNode(vector<Node> &nodes, int m, int newKey)
+{
+    int leftChildIndex = nodes[0].keyValuePairs[0].first;
+    int rightChildIndex = leftChildIndex + 1;
+
+    Node &leftChild = nodes[leftChildIndex];
+    Node &rightChild = nodes[rightChildIndex];
+    leftChild.type = 1;
+    rightChild.type = 1;
 
     int medianKey = nodes[1].keyValuePairs[m / 2].first;
     int medianIndex = newKey <= medianKey ? m / 2 : m / 2 + 1;
