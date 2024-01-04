@@ -62,6 +62,8 @@ int main()
     InsertNewRecordAtIndex(filename, 12, 204);
     InsertNewRecordAtIndex(filename, 18, 228);
     InsertNewRecordAtIndex(filename, 17, 216);
+    //InsertNewRecordAtIndex(filename, 32, 240);
+
     DisplayIndexFileContent(filename);
 
     cout << SearchARecord(filename, 3) << endl;
@@ -712,20 +714,21 @@ int InsertNewRecordAtIndex(char *filename, int RecordID, int Reference)
                 i = m - 1;
             }
 
-            if (nodes[childIndex].isFull && node.isFull)
-            {
-                int newChildIndex = splitChild(nodes, 1, childIndex, RecordID);
-
-                SimpleInsert(nodes[newChildIndex], RecordID, Reference);
-
-                updateNextEmptyNodeIndex(nodes);
-                splitParentRootNode(nodes, m, RecordID);
-
-                int rootNodeIndex = nodes[1].type == 0 ? 1 : (RecordID < nodes[1].keyValuePairs[0].first ? 8 : 9);
-                SimpleInsert(nodes[rootNodeIndex], RecordID, Reference);
-
-            }
-            else if (nodes[childIndex].isFull)
+//            if (nodes[childIndex].isFull && node.isFull)
+//            {
+//
+//                int newChildIndex = splitChild(nodes, 1, childIndex, RecordID);
+//
+//                SimpleInsert(nodes[newChildIndex], RecordID, Reference);
+//
+//                updateNextEmptyNodeIndex(nodes);
+//                splitParentRootNode(nodes, m, RecordID);
+//
+//                int rootNodeIndex = nodes[1].type == 0 ? 1 : (RecordID < nodes[1].keyValuePairs[0].first ? 8 : 9);
+//                SimpleInsert(nodes[rootNodeIndex], RecordID, Reference);
+//
+//            }
+             if (nodes[childIndex].isFull)
             {
                 int newChildIndex = splitChild(nodes, 1, childIndex, RecordID);
 
@@ -943,7 +946,7 @@ void updateNextEmptyNodeIndex(vector<Node> &nodes)
             newIndex++;
         }
     }
-
+    if (newIndex==nodes.size()) {newIndex=-1;}
     nodes[0].keyValuePairs[0].first = newIndex;
 }
 
